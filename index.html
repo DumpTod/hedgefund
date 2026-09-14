@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Institutional Quant Bot Telemetry</title>
+    <link rel="stylesheet" href="https://cloudflare.com" integrity="sha512-wnea99cKJU3e4cKcHRIzMZcNyDxWn0UXfjSKEXXVIPaxDt6wpKcVu5MSXRE3e6UAs1v76MfQ6dIk94Ifms9Kvg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen font-sans">
+    <div class="container mx-auto p-6 max-w-7xl">
+        <!-- Header -->
+        <header class="flex justify-between items-center border-b border-slate-800 pb-5 mb-8">
+            <div>
+                <h1 class="text-3xl font-extrabold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-teal-400 to-emerald-500">
+                    QUANT EDGE AI HEDGE TERMINAL
+                </h1>
+                <p class="text-xs text-slate-400 mt-1">Autonomous Neural Execution Matrix Framework v3.0</p>
+            </div>
+            <div class="flex gap-3">
+                <button onclick="triggerManualAudit()" class="px-4 py-2 text-xs font-semibold uppercase bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-lg transition">
+                    ⚡ Force Auditor Audit
+                </button>
+                <button id="toggleBtn" onclick="toggleSystem()" class="px-6 py-2 text-xs font-semibold uppercase tracking-wider bg-emerald-600 hover:bg-emerald-500 rounded-lg shadow-lg shadow-emerald-900/30 transition">
+                    Initialize Core Engine
+                </button>
+            </div>
+        </header>
+
+        <!-- Metric Grid Layout -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            <div class="bg-slate-900 border border-slate-800 p-6 rounded-xl">
+                <p class="text-xs font-medium uppercase tracking-wider text-slate-400 mb-1">Engine Operational Status</p>
+                <div class="flex items-center gap-2">
+                    <span id="statusDot" class="h-3 w-3 rounded-full bg-rose-500 animate-pulse"></span>
+                    <span id="statusTxt" class="text-2xl font-bold uppercase tracking-tight text-rose-400">OFFLINE</span>
+                </div>
+            </div>
+            <div class="bg-slate-900 border border-slate-800 p-6 rounded-xl">
+                <p class="text-xs font-medium uppercase tracking-wider text-slate-400 mb-1">Live Float Running PnL</p>
+                <span id="pnlTxt" class="text-2xl font-bold tracking-tight text-slate-200">$0.00</span>
+            </div>
+            <div class="bg-slate-900 border border-slate-800 p-6 rounded-xl">
+                <p class="text-xs font-medium uppercase tracking-wider text-slate-400 mb-1">Target Intelligence Confidence</p>
+                <span id="confTxt" class="text-2xl font-bold tracking-tight text-teal-400">0%</span>
+            </div>
+        </div>
+
+        <!-- Telemetry Logs Output Box -->
+        <div class="bg-slate-900 border border-slate-800 rounded-xl p-6">
+            <h2 class="text-sm font-semibold uppercase tracking-wider text-slate-300 mb-4 flex items-center gap-2">
+                <span>📊</span> Live Neural Assessment Processing Logs
+            </h2>
+            <div id="logsContainer" class="bg-slate-950 p-4 border border-slate-800 rounded-lg h-96 overflow-y-auto font-mono text-xs text-emerald-400 space-y-2">
+                <div class="text-slate-500">// System structural initialization complete. Core engine idle.</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- UI State Synchronization Scripts -->
+    <script>
+        async function refreshTelemetry() {
+            try {
+                const res = await fetch('/api/state');
+                const state = await res.json();
+                
+                document.getElementById("statusTxt").innerText = state.status;
+                const dot = document.getElementById("statusDot");
+                const txt = document.getElementById("statusTxt");
+                const btn = document.getElementById("toggleBtn");
+                
+                if (state.status === "ONLINE") {
+                    dot.className = "h-3 w-3 rounded-full bg-emerald-500 animate-ping";
+                    txt.className = "text-2xl font-bold uppercase tracking-tight text-emerald-400";
+                    btn.className = "px-6 py-2 text-xs font-semibold uppercase tracking-wider bg-rose-600 hover:bg-rose-500 rounded-lg shadow-lg shadow-rose-900/30 transition";
+                    btn.innerText = "Halt System Activity";
+                } else {
+                    dot.className = "h-3 w-3 rounded-full bg-rose-500";
+                    txt.className = "text-2xl font-bold uppercase tracking-tight text-rose-400";
+                    btn.className = "px-6 py-2 text-xs font-semibold uppercase tracking-wider bg-emerald-600 hover:bg-emerald-500 rounded-lg shadow-lg shadow-emerald-900/30 transition";
+                    btn.innerText = "Initialize Core Engine";
+                }
+                
+                const pnl = state.pnl;
+                const pnlElement = document.getElementById("pnlTxt");
+                pnlElement.innerText = (pnl >= 0 ? "+$" : "-$") + Math.abs(pnl).toFixed(2);
+                pnlElement.className = "text-2xl font-bold tracking-tight " + (pnl >= 0 ? "text-emerald-400" : "text-rose-400");
+                
+                document.getElementById("confTxt").innerText = state.confidence + "%";
+                
+                const logsBox = document.getElementById("logsContainer");
+                logsBox.innerHTML = state.active_logs.map(log => `<div>[⚡] ${log}</div>`).join("") || `<div class="text-slate-500">// Systems operational. Monitoring market tick indices...</div>`;
+                logsBox.scrollTop = logsBox.scrollHeight;
+            } catch(e) { console.log("State streaming syncing variance: ", e); }
+        }
+
+        async function toggleSystem() {
+            await fetch('/api/toggle', {method: 'POST'});
+            refreshTelemetry();
+        }
+
+        async function triggerManualAudit() {
+            alert("Self-Correction Audit Loop Initiated. Processing historical log arrays...");
+            const res = await fetch('/api/audit', {method: 'POST'});
+            const data = await res.json();
+            alert(data.message);
+        }
+
+        setInterval(refreshTelemetry, 2000);
+        window.onload = refreshTelemetry;
+    </script>
+</body>
+</html>
